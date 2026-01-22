@@ -5,149 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Management System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            /* --- THEME VARIABLES --- */
-            --bg: #F3F4F6;
-            --pattern: #E5E7EB;
-            --surface: #FFFFFF;
-            --border: #E5E7EB;
-            --text-main: #111827;
-            --text-sub: #6B7280;
-            
-            /* --- BRANDING --- */
-            --primary: #2563EB;
-            --primary-rgb: 37, 99, 235;
-            --danger: #EF4444;
-            --success: #10B981;
-            --warning: #F59E0B;
-            
-            /* --- PHYSICS --- */
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --modal-overlay: rgba(255, 255, 255, 0.8);
-            --radius: 12px;
-            --ease: cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #0F172A;
-            --pattern: #1E293B;
-            --surface: #1E293B;
-            --border: #334155;
-            --text-main: #F9FAFB;
-            --text-sub: #94A3B8;
-            --primary: #60A5FA;
-            --primary-rgb: 96, 165, 250;
-            --modal-overlay: rgba(15, 23, 42, 0.85);
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-        }
-
-        * { box-sizing: border-box; transition: background-color 0.3s, border-color 0.3s, color 0.3s; outline: none; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            background-image: radial-gradient(var(--pattern) 1px, transparent 1px);
-            background-size: 24px 24px;
-            color: var(--text-main);
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-        }
-
-        /* --- ICONS --- */
-        .icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-sm { width: 16px; height: 16px; }
-
-        /* --- NOTIFICATIONS --- */
-        #notify-stack {
-            position: fixed; top: 24px; right: 24px; width: 360px; z-index: 10000;
-            display: flex; flex-direction: column; gap: 12px; pointer-events: none;
-        }
-
-        .toast {
-            background: var(--surface); border: 1px solid var(--border);
-            padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow);
-            display: flex; align-items: flex-start; gap: 12px;
-            pointer-events: auto; position: relative; overflow: hidden;
-            animation: toastIn 0.4s var(--ease) forwards;
-        }
-        .toast.out { animation: toastOut 0.3s ease forwards; }
-        .toast::after { content: ''; position: absolute; bottom: 0; left: 0; height: 3px; background: currentColor; width: 100%; animation: progress linear forwards; }
-        .toast-content { flex: 1; }
-        .toast-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-        .toast-msg { font-size: 13px; color: var(--text-sub); line-height: 1.4; }
-        .t-success { color: var(--success); } .t-error { color: var(--danger); } .t-info { color: var(--primary); }
-
-        @keyframes toastIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes toastOut { to { opacity: 0; transform: translateX(50px); height: 0; padding: 0; margin: 0; border: 0; } }
-        @keyframes progress { from { width: 100%; } to { width: 0%; } }
-
-        /* --- MODALS --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background: var(--modal-overlay);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            z-index: 9999; display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .modal-overlay.active { display: flex; opacity: 1; }
-
-        .modal-box {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 16px; width: 90%; max-width: 400px;
-            padding: 24px; box-shadow: var(--shadow);
-            transform: scale(0.95); transition: transform 0.3s var(--ease);
-        }
-        .modal-overlay.active .modal-box { transform: scale(1); }
-        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-        .modal-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; }
-        .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
-
-        /* --- LAYOUT --- */
-        .container { width: 100%; max-width: 900px; padding: 20px; }
-        .view-section { display: none; animation: viewIn 0.5s var(--ease) forwards; }
-        .view-section.active { display: block; }
-        @keyframes viewIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* --- FORMS --- */
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); }
-        .centered { max-width: 550px; margin: 0 auto; }
-        .form-grid { display: grid; gap: 16px; }
-        .input-group { position: relative; }
-        .input-icon-wrap { position: absolute; left: 14px; top: 14px; color: var(--text-sub); }
-        .pass-toggle { position: absolute; right: 14px; top: 14px; color: var(--text-sub); cursor: pointer; }
-        .pass-toggle:hover { color: var(--primary); }
-        
-        input, textarea {
-            width: 100%; padding: 12px 40px 12px 44px; /* Space for both icons */
-            background: var(--bg); border: 1px solid var(--border);
-            border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--text-main);
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1); }
-
-        .btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
-        .btn-ghost:hover { background: var(--bg); color: var(--text-main); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-
-        /* --- DASHBOARD --- */
-        .dash-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
-        @media (max-width: 800px) { .dash-layout { grid-template-columns: 1fr; } }
-        .profile-card { text-align: center; }
-        .avatar { width: 72px; height: 72px; background: var(--primary); color: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto 16px; box-shadow: 0 10px 20px -5px rgba(var(--primary-rgb), 0.4); }
-        .course-item { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; }
-        
-        /* --- UTILS --- */
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 25px; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-main); z-index: 50; }
-        #preloader { position: fixed; inset: 0; background: var(--bg); z-index: 20000; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s; }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -170,7 +28,6 @@
         <div class="modal-box">
             <div class="modal-title">Student Login</div>
             <div class="modal-desc">Enter credentials to access records.</div>
-            
             <div class="form-grid">
                 <div class="input-group">
                     <span class="input-icon-wrap"><svg class="icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
@@ -181,7 +38,6 @@
                     <input type="password" id="loginPass" placeholder="Password">
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button class="btn btn-ghost" onclick="App.closeLogin()">Cancel</button>
                 <button class="btn btn-primary" onclick="App.processLogin()">Login</button>
@@ -190,15 +46,13 @@
     </div>
 
     <div class="container">
-        
         <div id="view-reg" class="view-section active">
             <div class="card centered">
                 <div style="text-align: center; margin-bottom: 30px;">
                     <svg class="icon" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 10px;" viewBox="0 0 24 24"><path d="M22 10v6M2 10v6M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z"></path></svg>
                     <h1>Course Management</h1>
-                    <p style="color: var(--text-sub);">New registration or add courses to existing profile.</p>
+                    <p style="color: var(--text-sub);">New registration or add courses.</p>
                 </div>
-
                 <div class="form-grid">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="input-group">
@@ -211,9 +65,7 @@
                             <span class="pass-toggle" onclick="App.togglePass('regPass')"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
                         </div>
                     </div>
-
                     <div style="height: 1px; background: var(--border); margin: 8px 0;"></div>
-
                     <div class="input-group">
                         <span class="input-icon-wrap"><svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></span>
                         <input type="text" id="regCode" placeholder="Course Code (e.g., CSC401)">
@@ -228,10 +80,8 @@
                             <input type="text" id="regLecturer" placeholder="Lecturer">
                         </div>
                     </div>
-
                     <button class="btn btn-primary" onclick="App.register()">Register Course <svg class="icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
                 </div>
-                
                 <div style="text-align: center; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
                     <button class="btn btn-ghost" style="width: 100%;" onclick="App.openLogin()">Already Registered? Login Here</button>
                 </div>
@@ -244,206 +94,26 @@
                     <div class="avatar" id="d-avatar">JD</div>
                     <h2 id="d-name">John Doe</h2>
                     <p style="color: var(--text-sub); font-size: 13px;">Secure Session Active</p>
-                    
                     <div class="stat-row" style="display:flex; justify-content:space-around; margin:20px 0;">
                         <div><b id="d-count">0</b><span style="font-size:11px; color:var(--text-sub);">Courses</span></div>
                         <div><b id="d-units">0</b><span style="font-size:11px; color:var(--text-sub);">Units</span></div>
                     </div>
-
                     <div style="display: grid; gap: 8px;">
-                        <button class="btn btn-ghost" onclick="window.print()"><svg class="icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Print Slip</button>
-                        <button class="btn btn-danger" onclick="App.logout()"><svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout</button>
+                        <button class="btn btn-ghost" onclick="window.print()">Print Slip</button>
+                        <button class="btn btn-danger" onclick="App.logout()">Logout</button>
                     </div>
                 </div>
-
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3 style="margin: 0;">Registered Courses</h3>
                         <button class="btn btn-primary" style="padding: 8px 12px; font-size: 12px;" onclick="App.returnToReg()">+ Add Course</button>
                     </div>
-                    <div id="course-list">
-                        </div>
+                    <div id="course-list"></div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <script>
-        /* --- NOTIFICATION ENGINE --- */
-        const Notify = {
-            stack: document.getElementById('notify-stack'),
-            show(msg, type = 'info', duration = 3000) {
-                const el = document.createElement('div');
-                el.className = `toast t-${type}`;
-                let iconSVG = type === 'success' ? '<polyline points="20 6 9 17 4 12"></polyline>' : 
-                             type === 'error' ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line>' :
-                             '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line>';
-                el.innerHTML = `<div class="toast-content"><div class="toast-title">${type.toUpperCase()}</div><div class="toast-msg">${msg}</div></div>`;
-                el.style.setProperty('animation-duration', '0.4s, ' + (duration/1000) + 's');
-                this.stack.appendChild(el);
-                setTimeout(() => { el.classList.add('out'); el.addEventListener('animationend', () => el.remove()); }, duration);
-            }
-        };
-
-        /* --- LOGIC ENGINE --- */
-        const DB = {
-            // New Key for Data Structure with Passwords
-            get: () => JSON.parse(localStorage.getItem('crms_v2')) || {},
-            set: (d) => localStorage.setItem('crms_v2', JSON.stringify(d))
-        };
-
-        const App = {
-            currentUser: null,
-
-            init() {
-                setTimeout(() => { document.getElementById('preloader').style.opacity = '0'; setTimeout(() => document.getElementById('preloader').remove(), 500); }, 800);
-                if(localStorage.getItem('theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
-            },
-
-            toggleTheme() {
-                if(document.body.getAttribute('data-theme') === 'dark') {
-                    document.body.removeAttribute('data-theme'); localStorage.setItem('theme', 'light');
-                } else {
-                    document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark');
-                }
-            },
-
-            togglePass(id) {
-                const el = document.getElementById(id);
-                el.type = el.type === 'password' ? 'text' : 'password';
-            },
-
-            /* --- REGISTRATION LOGIC --- */
-            register() {
-                const name = document.getElementById('regName').value.trim();
-                const pass = document.getElementById('regPass').value.trim();
-                const code = document.getElementById('regCode').value.trim().toUpperCase();
-                const unit = document.getElementById('regUnit').value;
-                const lect = document.getElementById('regLecturer').value;
-
-                if (!name || !pass || !code) {
-                    Notify.show('Name, Password, and Course Code are required.', 'error');
-                    return;
-                }
-
-                const db = DB.get();
-                let user = db[name];
-
-                // Check if User Exists
-                if (user) {
-                    // Verify Password
-                    if (user.password !== pass) {
-                        Notify.show('Incorrect password for this user.', 'error');
-                        return;
-                    }
-                } else {
-                    // Create New User
-                    user = { password: pass, courses: [] };
-                    Notify.show('New profile created!', 'info');
-                }
-
-                // Check Duplicate Course
-                if (user.courses.some(c => c.code === code)) {
-                    Notify.show('Course already registered.', 'warning');
-                    return;
-                }
-
-                // Add Course
-                user.courses.push({ code, unit, lect, ts: Date.now() });
-                db[name] = user;
-                DB.set(db);
-                
-                Notify.show(`Successfully registered ${code}`, 'success');
-                this.loadDashboard(name);
-            },
-
-            /* --- LOGIN LOGIC --- */
-            openLogin() {
-                document.getElementById('modal-login').classList.add('active');
-            },
-            closeLogin() {
-                document.getElementById('modal-login').classList.remove('active');
-            },
-            processLogin() {
-                const name = document.getElementById('loginName').value.trim();
-                const pass = document.getElementById('loginPass').value.trim();
-                
-                if(!name || !pass) { Notify.show('Enter credentials.', 'error'); return; }
-                
-                const db = DB.get();
-                if(db[name] && db[name].password === pass) {
-                    this.closeLogin();
-                    Notify.show('Welcome back!', 'success');
-                    this.loadDashboard(name);
-                } else {
-                    Notify.show('Invalid Username or Password.', 'error');
-                }
-            },
-
-            /* --- DASHBOARD LOGIC --- */
-            loadDashboard(name) {
-                this.currentUser = name;
-                document.getElementById('view-reg').classList.remove('active');
-                document.getElementById('view-dash').classList.add('active');
-                
-                // Reset Forms
-                ['regName','regPass','regCode','regUnit','regLecturer','loginName','loginPass'].forEach(id => document.getElementById(id).value = '');
-
-                // Fill Data
-                document.getElementById('d-name').textContent = name;
-                document.getElementById('d-avatar').textContent = name.slice(0,2).toUpperCase();
-                
-                const user = DB.get()[name];
-                const courses = user.courses || [];
-                
-                document.getElementById('d-count').textContent = courses.length;
-                document.getElementById('d-units').textContent = courses.reduce((a,b) => a + (parseInt(b.unit)||0), 0);
-
-                const list = document.getElementById('course-list');
-                list.innerHTML = '';
-                if(courses.length === 0) list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-sub)">No courses found.</div>';
-
-                courses.forEach(c => {
-                    list.innerHTML += `
-                        <div class="course-item">
-                            <div>
-                                <div style="font-weight:700; font-size:16px;">${c.code}</div>
-                                <div style="font-size:12px; color:var(--text-sub); margin-top:4px;">${c.unit || 0} Units • ${c.lect || 'TBA'}</div>
-                            </div>
-                            <div style="color:var(--success)"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                        </div>`;
-                });
-            },
-
-            logout() {
-                const modal = document.getElementById('modal-confirm');
-                document.getElementById('c-title').textContent = 'Secure Logout';
-                document.getElementById('c-desc').textContent = 'End your current session?';
-                
-                modal.classList.add('active');
-                
-                document.getElementById('c-cancel').onclick = () => modal.classList.remove('active');
-                document.getElementById('c-ok').onclick = () => {
-                    modal.classList.remove('active');
-                    this.currentUser = null;
-                    document.getElementById('view-dash').classList.remove('active');
-                    document.getElementById('view-reg').classList.add('active');
-                    Notify.show('Logged out successfully', 'info');
-                };
-            },
-
-            returnToReg() {
-                document.getElementById('regName').value = this.currentUser;
-                // Don't autofill password for security, let them re-enter or just context switch
-                // Actually, for UX in a simple app, we can switch views without clearing context
-                document.getElementById('view-dash').classList.remove('active');
-                document.getElementById('view-reg').classList.add('active');
-                Notify.show('Add courses for ' + this.currentUser, 'info');
-            }
-        };
-
-        App.init();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
